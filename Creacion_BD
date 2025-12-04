@@ -1,0 +1,66 @@
+import pandas as pd
+import numpy as np
+
+# Establecer la semilla para reproducibilidad
+np.random.seed(123)
+
+n_filas = 100
+
+# --- 1. Generación de Nombre del Usuario (Identificador Único) ---
+nombres_pila = ['Andrea', 'Miguel', 'Valeria', 'Javier', 'Carolina', 'Ricardo', 'Isabel', 'Daniel', 'Paula', 'Fernando']
+apellidos = ['Vargas', 'Soto', 'Ramos', 'Torres', 'Navarro', 'Herrera', 'Mendoza', 'Gil', 'Lara', 'Cruz']
+
+# Crear 100 nombres únicos combinando los componentes
+nombres_completos = []
+for i in range(n_filas):
+    nombre = np.random.choice(nombres_pila)
+    apellido1 = np.random.choice(apellidos)
+    apellido2 = np.random.choice(apellidos)
+    nombres_completos.append(f"{nombre} {apellido1} {apellido2}")
+
+# Asegurar 100 nombres únicos
+df = pd.DataFrame({'Nombre_Usuario': nombres_completos[:n_filas]})
+
+# --- 2. Generación de Edad (Cuantitativa Discreta) ---
+edades = np.random.randint(20, 60, n_filas)
+df['Edad'] = edades
+
+# --- 3. Generación de Nivel de Estudios (Cualitativa Ordinal) ---
+niveles_estudio = np.random.choice(
+    ['Secundaria', 'Técnico', 'Licenciatura', 'Maestría', 'Doctorado'],
+    n_filas,
+    p=[0.15, 0.25, 0.40, 0.15, 0.05]
+)
+df['Nivel_de_Estudios'] = niveles_estudio
+
+# --- 4. Generación de Altura (Cuantitativa Continua) ---
+# Distribución normal alrededor de 1.70 metros
+alturas = np.random.normal(loc=1.70, scale=0.10, size=n_filas).round(2)
+df['Altura_Metros'] = np.clip(alturas, 1.50, 2.00) # Limitar a un rango razonable (1.50 a 2.00m)
+
+# --- 5. Generación de Peso (Cuantitativa Continua) ---
+# Relacionar el peso con la altura para mayor realismo (IMC aproximado)
+# Peso = (Altura^2 * 25) + Ruido (25 es un IMC promedio saludable)
+peso_base = (df['Altura_Metros']**2 * 25)
+peso_ajuste = np.random.normal(0, 10, n_filas) # Ruido de +/- 10 kg
+peso = (peso_base + peso_ajuste).round(1)
+df['Peso_Kg'] = np.clip(peso, 45.0, 120.0) # Limitar a un rango razonable
+
+# --- 6. Generación de Ubicación (Cualitativa Categórica) ---
+ubicaciones = np.random.choice(
+    ['Zona Urbana (Capital)', 'Zona Urbana (Suburbios)', 'Ciudad Intermedia', 'Población Rural'],
+    n_filas,
+    p=[0.35, 0.30, 0.25, 0.10]
+)
+df['Ubicacion'] = ubicaciones
+
+# Reordenar las columnas y mostrar el resultado
+df = df[['Nombre_Usuario', 'Edad', 'Nivel_de_Estudios', 'Peso_Kg', 'Altura_Metros', 'Ubicacion']]
+
+# Guardar el DataFrame a un archivo CSV
+df.to_csv('base_datos_100_usuarios.csv', index=False, sep=',')
+
+# Mostrar las primeras 5 filas como ejemplo
+print("✅ Archivo 'base_datos_100_usuarios.csv' generado con 100 filas.")
+print("\n--- Vista Previa de la Base de Datos (Primeras 5 filas) ---")
+print(df.head())
